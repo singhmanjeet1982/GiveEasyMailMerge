@@ -4,15 +4,35 @@
     ViewData["Title"] = "Home Page";
 }
 <h4>This MailMerge utility is using 'Interop Word Libraries' for merging field's value from csv to word.</h4>
+@*<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>*@
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 <p>
     <u>Technologies used:</u><br />
     .Net Core 3.0<br />
     Gmail SMTP server<br />
     Microsoft interop Word Library
 </p>
+<script language="javascript" type="text/javascript">
+    $(document).ready(function () {
+
+        $("#submitform").click(function () {
+            $("span").text("");
+
+
+            if ($("#frmMailMerge").valid())
+                $("#message").text("In Progress...");
+        });
+
+    });
+
+</script>
 <div class="row">
     <div class="col-md-4">
-        <form method="post" enctype="multipart/form-data" asp-controller="Home" asp-action="Index">
+        <form method="post" enctype="multipart/form-data" id="frmMailMerge" asp-controller="Home" asp-action="Index">
+            <div class="form-group">
+                <font color="Green"><span id="message">@TempData["msg"]</span></font>
+            </div>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="TemplateFile" class="control-label"></label>
@@ -25,14 +45,11 @@
                 <span asp-validation-for="ValuesFile" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Send Email" class="btn btn-primary" />
+                <input type="submit" value="Send Email" class="btn btn-primary" id="submitform" name="submitform" />
             </div>
-            <div class="form-group">
-                <span>@TempData["msg"]</span>
-            </div>
+
         </form>
     </div>
 </div>
-
 
 

@@ -5,6 +5,7 @@ using Microsoft.Office.Interop.Word;
 using Range = Microsoft.Office.Interop.Word.Range;
 using Microsoft.Extensions.Options;
 using Giveaway.Infra;
+using System.Threading;
 
 namespace Giveaway.Helper
 {
@@ -32,20 +33,22 @@ namespace Giveaway.Helper
             //OBJECT OF MISSING "NULL VALUE"
             object oMissing = System.Reflection.Missing.Value;
             object oTemplatePath = templateFilePath;
-            Application wordApp = new Application();
+            Application wordApp;
             Document wordDoc = new Document();
 
-            
+
             try
             {
-                wordDoc = wordApp.Documents.Add(ref oTemplatePath, ref oMissing, ref oMissing, ref oMissing);
+
                 foreach (DataRow dr in templateValues.Rows)
                 {
+                    wordApp = new Application();
+                    wordDoc = wordApp.Documents.Add(ref oTemplatePath, ref oMissing, ref oMissing, ref oMissing);
                     foreach (Field myMergeField in wordDoc.Fields)
                     {
                         Range rngFieldCode = myMergeField.Code;
                         String fieldText = rngFieldCode.Text;
-                        
+
                         // ONLY GETTING THE MAILMERGE FIELDS
                         if (fieldText.StartsWith(" MERGEFIELD"))
                         {
@@ -60,25 +63,35 @@ namespace Giveaway.Helper
                             if (templateValues.Columns.Contains(fieldName))
                             {
                                 myMergeField.Select();
+                                if (fieldName == "shippingcost" && dr[fieldName].ToString().Trim() == "")
+                                {
+                                    wordApp.Selection.TypeText("0");
+                                }
                                 wordApp.Selection.TypeText(dr[fieldName].ToString());
+
                             }
                             else
                             {
-                                //Logic for Default values here
+                                //Logic if field name is not there in the csv or set any value here
                                 myMergeField.Select();
-                                wordApp.Selection.TypeText("Default Value");
+                                wordApp.Selection.TypeText("Error Value");
+
+
                             }
-                    
+
                         }
                     }
 
 
                     //Save word file as HTML to 
-                    wordDoc.SaveAs(Path.GetDirectoryName(templateFilePath) + "\\myfile.mht", WdSaveFormat.wdFormatWebArchive);
+                    wordDoc.SaveAs(Path.GetDirectoryName(templateFilePath) + "\\myfile.html", WdSaveFormat.wdFormatHTML);
                     wordApp.Application.Quit();
+                    wordDoc = null;
+                    wordApp = null;
 
+                    Thread.Sleep(1000);
                     //Read contents for HTML email and send email
-                    string content = File.ReadAllText("upload\\myfile.mht");
+                    string content = File.ReadAllText("upload\\myfile.html");
                     email.SendEmailAsync(dr["email"].ToString(), dr["subject"].ToString(), content).GetAwaiter().GetResult();
 
 
@@ -91,6 +104,11 @@ namespace Giveaway.Helper
                 wordDoc = null;
                 wordApp = null;
                 throw;
+            }
+            finally
+            {
+                File.Delete("upload\\myfile.html");
+
             }
 
         }

@@ -33,7 +33,7 @@ namespace Giveaway.Controllers
             if (ModelState.IsValid)
             {
                 await UploadFile(mailMergeFiles);
-                TempData["msg"] = "File Uploaded successfully.";
+                TempData["msg"] = "Mail Merge Completed Successfully.";
             }
             return View();
         }
@@ -44,34 +44,34 @@ namespace Giveaway.Controllers
         /// <returns></returns>
         public async Task<bool> UploadFile(MailMerge mailMergeFiles)
         {
-            string path = "";
-            
+            string path = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "Upload")); ;
+            string templateFileName="", valuesFileName="";
+
             try
             {
                 MultipartFormDataContent formDataContent = new MultipartFormDataContent();
-                
-                if (mailMergeFiles.TemplateFile !=null && mailMergeFiles.TemplateFile.Length > 0
+
+                if (mailMergeFiles.TemplateFile != null && mailMergeFiles.TemplateFile.Length > 0
                     && mailMergeFiles.ValuesFile != null && mailMergeFiles.ValuesFile.Length > 0)
                 {
                     //Upload template file to server
-                    string templateFileName = mailMergeFiles.TemplateFile.FileName;
-                    path = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "Upload"));
+                    templateFileName = DateTime.Now.ToString("yyyyMMddHHmmss") + mailMergeFiles.TemplateFile.FileName;
+                    
                     using (var filestream = new FileStream(Path.Combine(path, templateFileName), FileMode.Create))
                     {
                         await mailMergeFiles.TemplateFile.CopyToAsync(filestream);
                     }
 
                     //Upload csv file to server
-                    string valuesFileName = mailMergeFiles.ValuesFile.FileName;
-                    path = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "Upload"));
+                    valuesFileName = DateTime.Now.ToString("yyyyMMddHHmmss") + mailMergeFiles.ValuesFile.FileName;
                     using (var filestream = new FileStream(Path.Combine(path, valuesFileName), FileMode.Create))
                     {
                         await mailMergeFiles.ValuesFile.CopyToAsync(filestream);
                     }
-                    
+
 
                     //Read CSV file uploaded 
-                    System.Data.DataTable dt =  CSVReader.ConvertCSVtoDataTable(Path.Combine(path, valuesFileName));
+                    System.Data.DataTable dt = CSVReader.ConvertCSVtoDataTable(Path.Combine(path, valuesFileName));
                     wordMailMerge.generateEmail(Path.Combine(path, templateFileName), dt, Path.Combine(path, valuesFileName));
                     TempData["msg"] = "Email Generated successfully.";
                 }
@@ -82,7 +82,17 @@ namespace Giveaway.Controllers
             }
             catch (Exception)
             {
+
                 throw;
+            }
+            finally {
+                try
+                {
+                    System.IO.File.Delete(Path.Combine(path, templateFileName));
+                    System.IO.File.Delete(Path.Combine(path, valuesFileName));
+                }
+                catch(Exception)
+                { }
             }
             return true;
         }

@@ -31,6 +31,10 @@ namespace Giveaway.Services
             //Tested sending email through gmail SMTP server and it is working for my email id and password. 
             //Before that we have to go to "https://myaccount.google.com/intro/security -> Less secure app access -> Turn on Access" 
 
+            //OR
+
+            //use your own SMTP details here
+
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = new MailAddress("NO_REPLY@noreply.com.au");
             mailMessage.To.Add(new MailAddress(email));
@@ -42,7 +46,7 @@ namespace Giveaway.Services
             client.UseDefaultCredentials = false;
             client.EnableSsl = true;
             client.Credentials = new System.Net.NetworkCredential(settings.EmailUsername, settings.EmailPassword);
-            client.Host = "smtp.gmail.com";
+            client.Host = settings.EmailSMTP;
             return client.SendMailAsync(mailMessage);
 
             //Tried Send grid with api key, it worked initially then my email is diagnosed as spammer and blocked so coded back for SMTP.
