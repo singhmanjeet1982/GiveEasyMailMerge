@@ -1,0 +1,38 @@
+﻿@model MailMerge
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+<h4>This MailMerge utility is using 'Interop Word Libraries' for merging field's value from csv to word.</h4>
+<p>
+    <u>Technologies used:</u><br />
+    .Net Core 3.0<br />
+    Gmail SMTP server<br />
+    Microsoft interop Word Library
+</p>
+<div class="row">
+    <div class="col-md-4">
+        <form method="post" enctype="multipart/form-data" asp-controller="Home" asp-action="Index">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="TemplateFile" class="control-label"></label>
+                <input asp-for="TemplateFile" type="file" class="form-control" required>
+                <span asp-validation-for="TemplateFile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ValuesFile" class="control-label"></label>
+                <input asp-for="ValuesFile" type="file" class="form-control" required>
+                <span asp-validation-for="ValuesFile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Send Email" class="btn btn-primary" />
+            </div>
+            <div class="form-group">
+                <span>@TempData["msg"]</span>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
