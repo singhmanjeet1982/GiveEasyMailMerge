@@ -33,7 +33,7 @@ namespace Giveaway.Controllers
             if (ModelState.IsValid)
             {
                 await UploadFile(mailMergeFiles);
-                TempData["msg"] = "Mail Merge Completed Successfully.";
+                
             }
             return View();
         }
@@ -72,12 +72,20 @@ namespace Giveaway.Controllers
 
                     //Read CSV file uploaded 
                     System.Data.DataTable dt = CSVReader.ConvertCSVtoDataTable(Path.Combine(path, valuesFileName));
-                    wordMailMerge.generateEmail(Path.Combine(path, templateFileName), dt, Path.Combine(path, valuesFileName));
-                    TempData["msg"] = "Email Generated successfully.";
+                    string result = wordMailMerge.generateEmail(Path.Combine(path, templateFileName), dt, Path.Combine(path, valuesFileName));
+                    if (result.StartsWith("Error"))
+                    {
+                        TempData["msg"] = result;
+                        return false;
+                    }
+                    //TempData["msg"] = "Email Generated successfully.";
+                    TempData["msg"] = "Success: Mail Merge Completed Successfully.";
+                    return true;
                 }
                 else
                 {
-                    TempData["msg"] = "File doesnot contain any data.";
+                    TempData["msg"] = "Error: File doesnot contain any data.";
+                    return false;
                 }
             }
             catch (Exception)
@@ -94,7 +102,7 @@ namespace Giveaway.Controllers
                 catch(Exception)
                 { }
             }
-            return true;
+            
         }
     }
 }

@@ -7,6 +7,6 @@ namespace Giveaway.Infra
 {
     public interface IWordMailMerge
     {
-        public void generateEmail(string templateFilePath, System.Data.DataTable templateValues, string valuesFilePath);
+        public string generateEmail(string templateFilePath, System.Data.DataTable templateValues, string valuesFilePath);
     }
 }

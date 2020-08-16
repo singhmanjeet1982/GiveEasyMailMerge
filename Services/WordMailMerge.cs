@@ -28,7 +28,7 @@ namespace Giveaway.Helper
         /// <param name="templateFilePath"></param>
         /// <param name="templateValues"></param>
         /// <param name="valuesFilePath"></param>
-        public void generateEmail(string templateFilePath, System.Data.DataTable templateValues, string valuesFilePath)
+        public string generateEmail(string templateFilePath, System.Data.DataTable templateValues, string valuesFilePath)
         {
             //OBJECT OF MISSING "NULL VALUE"
             object oMissing = System.Reflection.Missing.Value;
@@ -63,16 +63,17 @@ namespace Giveaway.Helper
                             if (templateValues.Columns.Contains(fieldName))
                             {
                                 myMergeField.Select();
+                                //Set default value here for any field
                                 if (fieldName == "shippingcost" && dr[fieldName].ToString().Trim() == "")
                                 {
-                                    wordApp.Selection.TypeText("0");
+                                    wordApp.Selection.TypeText("AUD 0.00");
                                 }
                                 wordApp.Selection.TypeText(dr[fieldName].ToString());
 
                             }
                             else
                             {
-                                //Logic if field name is not there in the csv or set any value here
+                                //Logic if field name is not there in the csv or set any default value here
                                 myMergeField.Select();
                                 wordApp.Selection.TypeText("Error Value");
 
@@ -80,6 +81,7 @@ namespace Giveaway.Helper
                             }
 
                         }
+                        
                     }
 
 
@@ -97,12 +99,17 @@ namespace Giveaway.Helper
 
 
                 }
+                return "true";
             }
             catch (Exception ex)
             {
                 // Release References.
                 wordDoc = null;
                 wordApp = null;
+                if (ex.Source.ToLower().Contains("mail"))
+                {
+                    return "Error: Problem in sending email. Please check SMTP connection.";
+                }
                 throw;
             }
             finally
